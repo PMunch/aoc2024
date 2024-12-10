@@ -15,7 +15,8 @@ var
   mapHeight: int
 
 template pos(x, y: int): Position =
-  Position(y*mapWidth + x)
+  if x notin 0..<mapWidth or y notin 0..<mapHeight: Position(uint16.high)
+  else: Position(y*mapWidth + x)
 
 template vec(x, y: int, dir: Direction): Vector =
   Vector(dir.int * (mapWidth * mapHeight) + y*mapWidth + x)
@@ -29,11 +30,6 @@ for y, line in enumerate("input.txt".lines):
     of '#': obstacles.incl pos(x, y)
     of '^': initialGuardPos = (x, y)
     else: quit 1
-
-#echo guardPos
-#echo obstacles
-#echo mapWidth
-#echo mapHeight
 
 var loops = 0
 for y in 0..<mapHeight:
@@ -53,21 +49,28 @@ for y in 0..<mapHeight:
         inc loops
         break
       path.incl currentVector
+
       case currentDirection:
       of North: guardPos.y -= 1
       of South: guardPos.y += 1
       of West: guardPos.x -= 1
       of East: guardPos.x += 1
 
-      case currentDirection:
-      of North:
-        if obstacles.contains pos(guardPos.x, guardPos.y - 1): currentDirection = East
-      of South:
-        if obstacles.contains pos(guardPos.x, guardPos.y + 1): currentDirection = West
-      of West:
-        if obstacles.contains pos(guardPos.x - 1, guardPos.y): currentDirection = North
-      of East:
-        if obstacles.contains pos(guardPos.x + 1, guardPos.y): currentDirection = South
+      while true:
+        case currentDirection:
+        of North:
+          if obstacles.contains pos(guardPos.x, guardPos.y - 1): currentDirection = East
+          else: break
+        of South:
+          if obstacles.contains pos(guardPos.x, guardPos.y + 1): currentDirection = West
+          else: break
+        of West:
+          if obstacles.contains pos(guardPos.x - 1, guardPos.y): currentDirection = North
+          else: break
+        of East:
+          if obstacles.contains pos(guardPos.x + 1, guardPos.y): currentDirection = South
+          else: break
+
     obstacles.excl pos(x, y)
 
 echo loops

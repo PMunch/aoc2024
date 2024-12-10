@@ -14,7 +14,8 @@ var
   mapHeight: int
 
 template pos(x, y: int): Position =
-  Position(y*mapWidth + x)
+  if x notin 0..<mapWidth or y notin 0..<mapHeight: Position(uint16.high)
+  else: Position(y*mapWidth + x)
 
 for y, line in enumerate("input.txt".lines):
   mapWidth = line.len
@@ -39,14 +40,27 @@ while guardPos.x in 0..<mapWidth and guardPos.y in 0..<mapHeight:
   of West: guardPos.x -= 1
   of East: guardPos.x += 1
 
-  case currentDirection:
-  of North:
-    if obstacles.contains pos(guardPos.x, guardPos.y - 1): currentDirection = East
-  of South:
-    if obstacles.contains pos(guardPos.x, guardPos.y + 1): currentDirection = West
-  of West:
-    if obstacles.contains pos(guardPos.x - 1, guardPos.y): currentDirection = North
-  of East:
-    if obstacles.contains pos(guardPos.x + 1, guardPos.y): currentDirection = South
+  while true:
+    case currentDirection:
+    of North:
+      if obstacles.contains pos(guardPos.x, guardPos.y - 1): currentDirection = East
+      else: break
+    of South:
+      if obstacles.contains pos(guardPos.x, guardPos.y + 1): currentDirection = West
+      else: break
+    of West:
+      if obstacles.contains pos(guardPos.x - 1, guardPos.y): currentDirection = North
+      else: break
+    of East:
+      if obstacles.contains pos(guardPos.x + 1, guardPos.y): currentDirection = South
+      else: break
 
 echo visited.card
+
+for y, line in enumerate("input.txt".lines):
+  for x, tile in line:
+    if pos(x, y) in visited:
+      stdout.write "¤"
+    else:
+      stdout.write tile
+  stdout.write "\n"
